@@ -5,7 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商品搜尋</title>
     <style>
-        /* 現有的 CSS 保持不變 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            margin: 10px auto 0;
+            gap: 10px;
+        }
+
+        input[type="text"],
+        button {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            word-wrap: break-word;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -43,8 +102,8 @@
                     updateTitleWithTime(lastUpdated);
 
                     productData = data.products;
-                    populateLocationFilter();
-                    displayResults(productData); // 頁面初始化時顯示完整資料
+                    populateLocationFilter(); // 填充篩選器
+                    displayResults(productData); // 初始顯示所有資料
                 })
                 .catch(error => {
                     document.body.innerHTML = `<p>載入錯誤：${error.message}</p>`;
@@ -57,41 +116,53 @@
         }
 
         function populateLocationFilter() {
+            const locationFilter = document.createElement("select");
+            locationFilter.id = "locationFilter";
+            locationFilter.onchange = filterByLocation;
+
+            // 新增篩選選項 - 全部
+            const allOption = document.createElement("option");
+            allOption.value = "";
+            allOption.textContent = "全部";
+            locationFilter.appendChild(allOption);
+
+            // 處理儲位值，新增選項
             productData.forEach(item => {
-                if (item["儲位"]) allLocations.add(item["儲位"]);
+                const location = item["儲位"] ? item["儲位"].trim() : "未指定";
+                allLocations.add(location);
             });
-            const locationFilter = document.getElementById("locationFilter");
+
             allLocations.forEach(location => {
                 const option = document.createElement("option");
                 option.value = location;
                 option.textContent = location;
                 locationFilter.appendChild(option);
             });
-        }
 
-        function filterResults() {
-            const query = document.getElementById("searchInput").value.toLowerCase().trim();
-            if (query === "") {
-                displayResults(productData);
-                return;
-            }
-
-            const filteredResults = productData.filter(item =>
-                (item["商品名稱"] && item["商品名稱"].toLowerCase().includes(query)) ||
-                (item["商品編號"] && item["商品編號"].includes(query))
-            );
-
-            displayResults(filteredResults);
+            // 插入到表格標題中
+            const resultsDiv = document.getElementById("results");
+            if (resultsDiv) {
+                resultsDiv.innerHTML = ""; // 清空篩選器位置
+                const tableHeader = `<table><tr><th>儲位 ${locationFilter.outerHTML}</th></table></div>`;
+                document.innerHTML=(resultsDiv.tableHeader; )
+            
+            document.getElementById("results").innerHTML = ""; // 插入完整表格
+            displayResults(productData);
         }
 
         function filterByLocation() {
             const selectedLocation = document.getElementById("locationFilter").value;
+            let filteredResults;
+
             if (selectedLocation === "") {
-                displayResults(productData);
-                return;
+                filteredResults = productData;
+            } else {
+                filteredResults = productData.filter(item => {
+                    const location = item["儲位"] ? item["儲位"].trim() : "未指定";
+                    return location === selectedLocation;
+                });
             }
 
-            const filteredResults = productData.filter(item => item["儲位"] === selectedLocation);
             displayResults(filteredResults);
         }
 
@@ -102,18 +173,23 @@
             }
 
             let table = "<table><tr><th>儲位<select id='locationFilter' onchange='filterByLocation()'><option value=''>全部</option></select></th><th>商品編號</th><th>商品名稱</th><th>電腦現存量</th></tr>";
+
             results.forEach(item => {
-                table += `<tr><td>${item["儲位"]}</td><td>${item["商品編號"]}</td><td>${item["商品名稱"]}</td><td>${item["電腦現存量"]}</td></tr>`;
+                const location = item["儲位"] ? item["儲位"] : "未指定";
+                table += `<tr><td>${location}</td><td>${item["商品編號"]}</td><td>${item["商品名稱"]}</td><td>${item["電腦現存量"]}</td></tr>`;
             });
+
             table += "</table>";
             document.getElementById("results").innerHTML = table;
+
+            // 再次填充篩選器（確保選項正確）
+            populateLocationFilter();
         }
 
         function clearSearch() {
             document.getElementById("searchInput").value = "";
-            displayResults(productData); // 清空搜尋後回到完整列表
+            displayResults(productData); // 重置表格到所有資料
         }
     </script>
-
 </body>
 </html>
