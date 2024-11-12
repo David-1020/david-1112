@@ -142,12 +142,9 @@
             // 插入到表格標題中
             const resultsDiv = document.getElementById("results");
             if (resultsDiv) {
-                resultsDiv.innerHTML = ""; // 清空篩選器位置
-                const tableHeader = `<table><tr><th>儲位 ${locationFilter.outerHTML}</th></table></div>`;
-                document.innerHTML=(resultsDiv.tableHeader; )
-            
-            document.getElementById("results").innerHTML = ""; // 插入完整表格
-            displayResults(productData);
+                resultsDiv.innerHTML = ""; // 清空內容
+                resultsDiv.appendChild(locationFilter);
+            }
         }
 
         function filterByLocation() {
@@ -172,8 +169,7 @@
                 return;
             }
 
-            let table = "<table><tr><th>儲位<select id='locationFilter' onchange='filterByLocation()'><option value=''>全部</option></select></th><th>商品編號</th><th>商品名稱</th><th>電腦現存量</th></tr>";
-
+            let table = "<table><tr><th>儲位</th><th>商品編號</th><th>商品名稱</th><th>電腦現存量</th></tr>";
             results.forEach(item => {
                 const location = item["儲位"] ? item["儲位"] : "未指定";
                 table += `<tr><td>${location}</td><td>${item["商品編號"]}</td><td>${item["商品名稱"]}</td><td>${item["電腦現存量"]}</td></tr>`;
@@ -181,9 +177,6 @@
 
             table += "</table>";
             document.getElementById("results").innerHTML = table;
-
-            // 再次填充篩選器（確保選項正確）
-            populateLocationFilter();
         }
 
         function clearSearch() {
